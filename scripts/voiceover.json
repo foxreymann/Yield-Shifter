@@ -1,0 +1,11 @@
+[
+  {"id": "s1_intro",    "text": "Meet Yield Shifter. An AI agent that puts your idle stablecoins to work on Merkl, moves every pound through Stripe, and explains why. All inside a policy you write once."},
+  {"id": "s2_risk",     "text": "On first run, it asks for your risk profile. Notice there's no low option. DeFi is never low risk. I'll go Very high."},
+  {"id": "s3_exposure", "text": "Next: stables only, or allow some crypto exposure? I'll cap crypto at twenty percent."},
+  {"id": "s4_warning",  "text": "Before a penny moves, it shows the UK risk warning. Everything can go to zero, and DeFi protocols get hacked. I have to acknowledge that explicitly."},
+  {"id": "s5_policy",   "text": "My answers become a written policy. Minimum TVL, a cap per position, no borrowing, and a ceiling on yields that look too good to be true. It's saved, so it never asks again."},
+  {"id": "s6_scan",     "text": "Now it scans every live Merkl opportunity in real time. The juiciest APRs get rejected, each with a logged reason. What survives becomes a diversified plan for my thousand USDC."},
+  {"id": "s7_execute",  "text": "It's within policy, so the agent executes on its own. Each move is a real Stripe test-mode payment, carrying the Merkl opportunity, the APR and the reasoning in its metadata."},
+  {"id": "s8_rebalance","text": "A week later, a Merkl campaign winds down and that APR collapses. The agent finds a better opportunity, refunds the old position through Stripe, and redeploys. No human needed."},
+  {"id": "s9_audit",    "text": "And every pound is explained. The audit trail shows what moved, where, and why. Yield Shifter: autonomy, with control."}
+]

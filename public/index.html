@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>YieldShifter</title>
+<link rel="icon" href="/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff5f8; --panel: #ffffff; --panel2: #ffffff; --line: #f6d5e1; --line2: #fbe6ee; --text: #3a1f2b; --muted: #9a6f80;
+    --accent: #e8457f; --accent-soft: #ffe3ee; --accent2: #ff8fb3; --warn: #b86a00; --danger: #d12f4a; --ok: #12925f; --stripe: #635bff;
+    --chip: #fdeaf1; --shadow: 0 1px 2px rgba(150, 40, 80, .06), 0 6px 20px rgba(220, 80, 130, .07);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Inter, system-ui, sans-serif; height: 100vh; overflow: hidden; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  header { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.85); backdrop-filter: blur(8px); }
+  .logo { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, #ff6fa0, #c43b8f); color: #fff; display: grid; place-items: center; font-weight: 800; box-shadow: 0 4px 12px rgba(232, 69, 127, .35); }
+  header h1 { font-size: 17px; margin: 0; font-weight: 800; letter-spacing: -.01em; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); background: #fff; display: inline-flex; gap: 6px; align-items: center; }
+  .pill.stripe { border-color: #cfccff; color: #4b44d6; background: #f1f0ff; }
+  .pill.sim { border-color: #f3d29a; color: var(--warn); background: #fff6e6; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+  .grow { flex: 1; }
+  main { display: grid; grid-template-columns: 1fr 470px; height: calc(100vh - 59px); }
+  #chat { overflow-y: auto; padding: 22px 28px 120px; scroll-behavior: smooth; background: radial-gradient(900px 500px at 20% 0%, #ffe6ef 0%, transparent 70%); }
+  aside { border-left: 1px solid var(--line); background: #fdeef3; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .msg { display: flex; gap: 12px; margin: 0 0 16px; animation: in .35s ease both; max-width: 860px; }
+  .msg.user { justify-content: flex-end; margin-left: auto; }
+  .avatar { flex: none; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, #ff6fa0, #c43b8f); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 800; }
+  .bubble { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 15px; min-width: 0; box-shadow: var(--shadow); }
+  .user .bubble { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .bubble b { color: #2a0f1c; }
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid #f0bfd1; background: #fff; color: var(--text); padding: 9px 16px; font-weight: 600; transition: .15s; }
+  button:hover, button.hover { border-color: var(--accent); background: var(--accent-soft); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .choice-card { text-align: left; width: 250px; padding: 12px 14px; }
+  .choice-card small { display: block; color: var(--muted); font-weight: 400; margin-top: 3px; font-size: 12.5px; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  input[type=range] { width: 200px; accent-color: var(--accent); vertical-align: middle; }
+  .warnbox { border: 1px solid #f3a9b6; background: linear-gradient(180deg, #fff0f2, #ffe6ea); border-radius: 14px; padding: 16px 18px; max-width: 640px; }
+  .warnbox h3 { margin: 0 0 8px; color: var(--danger); font-size: 16px; display: flex; gap: 8px; align-items: center; }
+  .warnbox p { margin: 6px 0; }
+  .warnbox ul { margin: 8px 0; padding-left: 20px; color: #7a2636; }
+  .warnbox label { display: flex; gap: 10px; align-items: center; margin-top: 12px; font-weight: 600; cursor: pointer; }
+  .warnbox input { width: 18px; height: 18px; accent-color: var(--danger); }
+  .card { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .card h4 { margin: 0 0 10px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; font-size: 13.5px; }
+  .kv span:nth-child(odd) { color: var(--muted); }
+  .bal { font-size: 30px; font-weight: 800; letter-spacing: -.02em; }
+  .bal small { font-size: 14px; color: var(--muted); font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td { padding: 7px 8px; border-bottom: 1px solid var(--line2); vertical-align: top; }
+  tr.row-in { animation: in .3s ease both; }
+  .apr { color: var(--ok); font-weight: 700; white-space: nowrap; }
+  .rej { color: var(--danger); }
+  .tag { font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+  .tag.stable { background: #e2f6ee; color: #0e7a50; }
+  .tag.crypto { background: #fff1dc; color: var(--warn); }
+  .progress { height: 6px; background: var(--chip); border-radius: 9px; overflow: hidden; margin: 10px 0 4px; }
+  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .25s linear; }
+  .stats { display: flex; gap: 22px; margin-top: 8px; }
+  .stat b { display: block; font-size: 22px; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .move { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding: 9px 0; border-bottom: 1px solid var(--line2); animation: in .3s ease both; }
+  .move:last-child { border: 0; }
+  .move .ic { width: 22px; height: 22px; border-radius: 6px; background: var(--stripe); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+  .move .ic.out { background: #f7c5d2; color: var(--danger); }
+  .move .why { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .move .sid, .sid { font-size: 11.5px; color: #4b44d6; }
+  .amt { font-weight: 700; white-space: nowrap; }
+  .timejump { text-align: center; color: var(--accent); font-weight: 700; margin: 26px 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; display: flex; align-items: center; gap: 14px; animation: in .4s ease both; }
+  .timejump::before, .timejump::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .audit-row { font-size: 12.5px; padding: 8px 0; border-bottom: 1px solid var(--line2); animation: in .3s ease both; }
+  .audit-row .t { color: var(--muted); font-size: 11px; }
+  .audit-row .k { font-weight: 700; font-size: 11px; padding: 1px 6px; border-radius: 5px; background: var(--chip); margin-right: 6px; }
+  .audit-row .k.MOVE { background: #ecebff; color: #4b44d6; }
+  .audit-row .k.POLICY { background: #e2f6ee; color: #0e7a50; }
+  .audit-row .k.SCAN { background: #fff1dc; color: var(--warn); }
+  .typing { display: inline-flex; gap: 4px; } .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: blink 1s infinite; } .typing i:nth-child(2){animation-delay:.2s} .typing i:nth-child(3){animation-delay:.4s}
+  .empty { color: var(--muted); font-size: 13px; }
+  #cursor { position: fixed; z-index: 99; width: 22px; height: 22px; pointer-events: none; left: -50px; top: -50px; transition: left .7s cubic-bezier(.4,0,.2,1), top .7s cubic-bezier(.4,0,.2,1); filter: drop-shadow(0 2px 4px rgba(80,0,40,.35)); }
+  #cursor.click::after { content: ''; position: absolute; left: -9px; top: -9px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--accent); animation: ripple .5s ease-out; }
+  #caption { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: rgba(255,255,255,.92); border: 1px solid var(--line); padding: 9px 18px; border-radius: 12px; font-size: 16px; font-weight: 600; max-width: 900px; text-align: center; opacity: 0; transition: opacity .3s; z-index: 98; backdrop-filter: blur(6px); }
+  #caption.show { opacity: 1; }
+  #title { position: fixed; inset: 0; z-index: 200; background: radial-gradient(1100px 600px at 30% 15%, #ffd3e3 0%, #fff5f8 65%); display: grid; place-items: center; text-align: center; transition: opacity .8s; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  #title h2 { font-size: 64px; margin: 18px 0 8px; letter-spacing: -.03em; color: #2a0f1c; }
+  #title p { color: var(--muted); font-size: 22px; margin: 0; }
+  #title .logos { margin-top: 30px; display: flex; gap: 14px; justify-content: center; }
+  #title .big { width: 84px; height: 84px; border-radius: 22px; font-size: 40px; margin: auto; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes blink { 50% { opacity: .2; } }
+  @keyframes ripple { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+</style>
+</head>
+<body>
+<div id="title" class="hide">
+  <div>
+    <div class="logo big">Y</div>
+    <h2>YieldShifter</h2>
+    <p>Your stablecoins, working on Merkl. Every move settled via Stripe and explained.</p>
+    <div class="logos"><span class="pill">Merkl live yields</span><span class="pill stripe">Stripe test mode</span><span class="pill">Written policy</span><span class="pill">Full audit trail</span></div>
+  </div>
+</div>
+<header>
+  <div class="logo">Y</div>
+  <div><h1>YieldShifter</h1><div class="sub">Autonomous yield agent · Merkl × Stripe</div></div>
+  <div class="grow"></div>
+  <span class="pill"><span class="dot"></span> Merkl API live</span>
+  <span id="stripeBadge" class="pill stripe">Stripe</span>
+</header>
+<main>
+  <section id="chat"></section>
+  <aside>
+    <div class="card">
+      <h4>Wallet <span class="mono" style="text-transform:none;letter-spacing:0">demo balance</span></h4>
+      <div class="bal"><span id="bal">1,000.00</span> <small>USDC</small></div>
+      <div class="stats">
+        <div class="stat"><b id="blended">—</b><span>blended APR</span></div>
+        <div class="stat"><b id="yearly">—</b><span>est. yield / yr</span></div>
+        <div class="stat"><b id="deployed">0%</b><span>deployed</span></div>
+      </div>
+    </div>
+    <div class="card"><h4>Written policy <span id="policyFile" class="mono" style="text-transform:none;letter-spacing:0"></span></h4><div id="policy" class="empty">Not set. Agent will ask on first run.</div></div>
+    <div class="card"><h4>Positions</h4><div id="positions" class="empty">No positions yet.</div></div>
+    <div class="card"><h4>Audit trail <span class="mono" style="text-transform:none;letter-spacing:0">data/audit.jsonl</span></h4><div id="audit" class="empty">Every action is logged with its reason.</div></div>
+  </aside>
+</main>
+<svg id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#2a0f1c" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+<div id="caption"></div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const chat = $('#chat');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const fmt = (n) => n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n) => n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1e3)}K`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const api = async (p, body) => (await fetch(p, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined)).json();
+let state = { positions: [] };
+// In ?demo mode the recorder releases each autonomous phase in sync with the narration.
+const DEMO = new URLSearchParams(location.search).has('demo');
+const gates = {};
+const gate = (n) => {
+  if (DEMO) return new Promise((ok) => (gates[n] = ok));
+  if (n !== 'rebalance') return Promise.resolve();
+  const m = bot(`<div class="choices"><button data-v="go">⏩ Run weekly yield check</button></div>`);
+  return choose(m);
+};
+window.release = (n) => { const f = gates[n]; if (f) { delete gates[n]; f(); return true; } return false; };
+
+function bot(html) {
+  const m = document.createElement('div'); m.className = 'msg';
+  m.innerHTML = `<div class="avatar">Y</div><div class="bubble">${html}</div>`;
+  chat.appendChild(m); chat.scrollTop = chat.scrollHeight; return m;
+}
+function user(text) {
+  const m = document.createElement('div'); m.className = 'msg user';
+  m.innerHTML = `<div class="bubble">${esc(text)}</div>`; chat.appendChild(m); chat.scrollTop = chat.scrollHeight;
+}
+async function think(ms = 700) { const t = bot('<span class="typing"><i></i><i></i><i></i></span>'); await sleep(ms); t.remove(); }
+const scroll = () => (chat.scrollTop = chat.scrollHeight);
+// wait for one of the buttons inside el to be clicked (by human or by the demo recorder)
+const choose = (el) => new Promise((ok) => el.querySelectorAll('[data-v]').forEach((b) => b.addEventListener('click', () => { el.querySelectorAll('button').forEach((x) => (x.disabled = true)); ok(b.dataset.v); })));
+
+function renderPolicy(p) {
+  if (!p) return;
+  $('#policyFile').textContent = 'data/policy.json';
+  $('#policy').className = 'kv';
+  $('#policy').innerHTML = [
+    ['Risk profile', p.riskLabel], ['Crypto exposure', p.stablesOnly ? 'Stables only' : `≤ ${p.cryptoCapPct}%`],
+    ['Min TVL', money(p.minTvlUsd)], ['APR ceiling', `${p.maxAprPct}% (too good to be true)`], ['Max per position', `${p.maxPerPositionPct}%`],
+    ['Allowed actions', p.allowedActions.join(', ')], ['Borrowing', 'Never'], ['Rebalance if', `+${p.rebalanceThresholdPct}pp APR`],
+  ].map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('');
+}
+function renderPositions() {
+  const ps = state.positions; if (!ps.length) return;
+  const total = ps.reduce((s, p) => s + p.amount, 0);
+  const blended = ps.reduce((s, p) => s + p.amount * p.apr, 0) / total;
+  $('#blended').textContent = blended.toFixed(1) + '%';
+  $('#yearly').textContent = '$' + fmt(total * blended / 100);
+  $('#deployed').textContent = Math.round(total / 10) + '%';
+  $('#bal').textContent = fmt(1000 - total);
+  $('#positions').className = '';
+  $('#positions').innerHTML = `<table><tr><th>Position</th><th>APR</th><th style="text-align:right">USDC</th></tr>${ps.map((p) => `<tr class="row-in"><td>${esc(p.to)}<div class="hint" style="margin:0">${esc(p.protocol)} · ${esc(p.chain)}</div></td><td class="apr">${p.apr.toFixed(1)}%</td><td class="amt" style="text-align:right">${fmt(p.amount)}</td></tr>`).join('')}</table>`;
+}
+async function renderAudit() {
+  const rows = await api('/api/audit'); if (!rows.length) return;
+  $('#audit').className = '';
+  $('#audit').innerHTML = rows.slice().reverse().map((r) => `<div class="audit-row"><span class="k ${r.type}">${r.type}${r.kind ? ' · ' + r.kind : ''}</span><span class="t mono">${r.ts.slice(11, 19)}</span>
+    ${r.type === 'MOVE' ? `<div><b>${fmt(r.amount)} USDC</b> ${r.kind === 'withdraw' ? 'from ' + esc(r.from) : '→ ' + esc(r.to)} <span class="mono sid">${r.stripe}</span></div>` : ''}
+    <div class="why">${esc(r.reason)}</div></div>`).join('');
+}
+
+// ---------- the agent ----------
+async function onboarding() {
+  bot(`Hi, I'm <b>YieldShifter</b>. You hold <b>1,000.00 USDC</b> sitting idle.<br>This is our first run, so before I touch a penny, let's write your policy.`);
+  await sleep(900); await think();
+  const q1 = bot(`<b>What's your risk profile?</b><div class="choices">
+      <button class="choice-card" data-v="high" id="risk-high">High<small>Blue-chip lending only · TVL ≥ $10M · APR ≤ 15%</small></button>
+      <button class="choice-card" data-v="very_high" id="risk-very_high">Very high<small>Adds liquidity pools · TVL ≥ $2M · APR ≤ 60%</small></button></div>
+      <div class="hint">There's no "low" or "medium". DeFi is never low risk.</div>`);
+  const risk = await choose(q1); user(risk === 'high' ? 'High' : 'Very high');
+  await think();
+  const q2 = bot(`<b>Stables only, or allow some crypto exposure?</b><div class="choices">
+      <button data-v="0" id="stables">Stables only</button>
+      <button data-v="cap" id="allowCrypto">Allow crypto exposure up to <span id="capv">20</span>%</button></div>
+      <div class="hint">Cap: <input type="range" id="cap" min="5" max="50" step="5" value="20"></div>`);
+  $('#cap', q2).oninput = (e) => ($('#capv', q2).textContent = e.target.value);
+  const c = await choose(q2);
+  const cryptoCapPct = c === 'cap' ? Number($('#cap', q2).value) : 0;
+  user(cryptoCapPct ? `Allow crypto exposure up to ${cryptoCapPct}%` : 'Stables only');
+  await think();
+  const q3 = bot(`<div class="warnbox">
+      <h3>⚠ Risk warning (UK)</h3>
+      <p><b>Don't invest unless you're prepared to lose all the money you invest.</b> This is a high-risk investment and you should not expect to be protected if something goes wrong.</p>
+      <ul><li>Cryptoassets are not covered by the FSCS or the Financial Ombudsman Service.</li>
+      <li>Every position can go to <b>zero</b>. Stablecoins can de-peg.</li>
+      <li>DeFi protocols are <b>often hacked</b>: billions are lost to exploits every year, and smart-contract audits are no guarantee.</li>
+      <li>Past yields are not a guide to future returns. APRs change hourly.</li></ul>
+      <label><input type="checkbox" id="ack"> I understand I could lose all of my money</label>
+      <div class="choices"><button class="primary" data-v="ok" id="accept" disabled>Accept &amp; continue</button></div></div>`);
+  $('#ack', q3).onchange = (e) => ($('#accept', q3).disabled = !e.target.checked);
+  await choose(q3); user('Accepted the risk warning');
+  const policy = await api('/api/policy', { risk, cryptoCapPct });
+  renderPolicy(policy); renderAudit();
+  await think(500);
+  bot(`Policy written and saved. I'll act <b>autonomously inside it</b> and never ask these questions again. Every move I make goes through Stripe with the reason attached.`);
+  return policy;
+}
+
+async function scanAndInvest(policy) {
+  await gate('scan');
+  await sleep(300);
+  const m = bot(`Scanning <b>live Merkl opportunities</b>…<div class="progress"><div></div></div><div class="hint" id="scanTxt">Fetching campaigns from api.merkl.xyz</div>`);
+  const bar = $('.progress > div', m);
+  const res = api('/api/scan');
+  for (let i = 0; i <= 100; i += 4) { bar.style.width = i + '%'; await sleep(55); }
+  const r = await res;
+  $('#scanTxt', m).innerHTML = `Scanned <b>${r.scanned}</b> live opportunities (TVL ≥ $1M) against your policy.`;
+  renderAudit(); scroll(); await sleep(1100);
+
+  bot(`<b>Rejected by policy</b>: the highest APRs are usually the riskiest.<table style="margin-top:8px"><tr><th>Opportunity</th><th>APR</th><th>Why rejected</th></tr>
+    ${r.rejected.slice(0, 6).map((o) => `<tr class="row-in"><td>${esc(o.name)}</td><td class="apr">${o.apr.toFixed(1)}%</td><td class="rej">${esc(o.reason)}</td></tr>`).join('')}</table>`);
+  scroll(); await sleep(2600);
+
+  const total = r.plan.reduce((s, p) => s + p.amount, 0);
+  bot(`<b>Allocation plan</b> for ${fmt(total)} USDC (all within policy):<table style="margin-top:8px"><tr><th>Opportunity</th><th>Type</th><th>TVL</th><th>APR</th><th style="text-align:right">USDC</th></tr>
+    ${r.plan.map((p) => `<tr class="row-in"><td>${esc(p.name)}<div class="hint" style="margin:0">${esc(p.protocol)} · ${esc(p.chain)}</div></td><td><span class="tag ${p.stable ? 'stable' : 'crypto'}">${p.stable ? 'stable' : 'crypto'}</span></td><td>${money(p.tvl)}</td><td class="apr">${p.apr.toFixed(1)}%</td><td class="amt" style="text-align:right">${fmt(p.amount)}</td></tr>`).join('')}</table>
+    <div class="hint">Crypto exposure ${Math.round(r.plan.filter((p) => !p.stable).reduce((s, p) => s + p.amount, 0) / 10)}% ≤ ${policy.cryptoCapPct}% cap ✓ · max position ${Math.max(...r.plan.map((p) => p.amount)) / 10}% ≤ ${policy.maxPerPositionPct}% ✓ · no borrowing ✓</div>`);
+  scroll(); await sleep(2400);
+
+  await gate('execute');
+  const mv = bot(`Within policy, so <b>executing without asking</b>. Moving funds via Stripe:<div id="moves" style="margin-top:6px"></div>`);
+  const ex = await api('/api/execute', { plan: r.plan });
+  for (const p of ex.positions) {
+    $('#moves', mv).insertAdjacentHTML('beforeend', `<div class="move"><div class="ic">S</div><div><b>${fmt(p.amount)} USDC → ${esc(p.to)}</b><div class="why">${esc(p.reason)}</div><div class="sid mono">${p.stripe}${p.simulated ? ' (simulated)' : ' · Stripe test mode ✓'}</div></div><div class="apr">${p.apr.toFixed(1)}%</div></div>`);
+    state.positions.push(p); renderPositions(); scroll(); await sleep(900);
+  }
+  renderAudit();
+  await sleep(600);
+  bot(`Done. <b>${fmt(total)} USDC</b> deployed at a blended <b>${$('#blended').textContent}</b> APR. I'll keep watching the yields.`);
+  scroll();
+}
+
+async function rebalance() {
+  const ps = state.positions;
+  const target = ps.filter((p) => !/WETH|ETH|BTC/i.test(p.to)).sort((a, b) => b.apr - a.apr)[0];
+  chat.insertAdjacentHTML('beforeend', `<div class="timejump">⏩ 7 days later</div>`); scroll();
+  await sleep(900); await think(600);
+  const dropTo = Math.max(0.8, +(target.apr * 0.2).toFixed(1));
+  bot(`Routine check: APR on <b>${esc(target.to)}</b> dropped from <b>${target.apr.toFixed(1)}%</b> to <b class="rej">${dropTo}%</b> as its Merkl campaign wound down.`);
+  scroll(); await sleep(1500); await think(600);
+  const r = await api('/api/rebalance', { simulateDropId: target.id, dropTo });
+  if (!r.moved) { bot('No better option beats the rebalance threshold. Holding.'); return; }
+  bot(`Found a better home that passes every policy check. Rebalancing:<div style="margin-top:6px">
+    <div class="move"><div class="ic out">↩</div><div><b>${fmt(r.withdraw.amount)} USDC ← ${esc(r.withdraw.from)}</b><div class="sid mono">${r.withdraw.stripe} (refund)</div></div><div class="apr rej">${dropTo}%</div></div>
+    <div class="move"><div class="ic">S</div><div><b>${fmt(r.deposit.amount)} USDC → ${esc(r.deposit.to)}</b><div class="why">${esc(r.reason)}</div><div class="sid mono">${r.deposit.stripe}</div></div><div class="apr">${r.to.apr.toFixed(1)}%</div></div></div>`);
+  state.positions = r.positions; renderPositions(); renderAudit(); scroll();
+  await sleep(1200);
+  bot(`Blended APR now <b>${$('#blended').textContent}</b>. Every move is in the audit trail →`); scroll();
+}
+
+async function main() {
+  const s = await api('/api/state');
+  const b = $('#stripeBadge');
+  if (s.stripeMode === 'test') b.innerHTML = '<span class="dot" style="background:#635bff;box-shadow:0 0 6px #635bff"></span> Stripe TEST MODE';
+  else { b.className = 'pill sim'; b.textContent = 'Stripe: simulated (no key)'; }
+  let policy = s.policy;
+  if (!policy) policy = await onboarding(); else { renderPolicy(policy); bot(`Welcome back. Using your saved <b>${policy.riskLabel}</b> risk policy.`); }
+  await scanAndInvest(policy);
+  window.__investDone = true;
+  await gate('rebalance');
+  await rebalance();
+  window.__rebalanceDone = true;
+}
+
+// helpers used by the demo recorder
+window.demo = {
+  async moveTo(sel) { const el = typeof sel === 'string' ? $(sel) : sel; el.scrollIntoView({ block: 'nearest' }); const r = el.getBoundingClientRect(); const c = $('#cursor'); c.style.left = r.left + r.width / 2 + 'px'; c.style.top = r.top + r.height / 2 + 'px'; await sleep(750); el.classList.add('hover'); },
+  async click(sel) { await this.moveTo(sel); const c = $('#cursor'); c.classList.remove('click'); void c.offsetWidth; c.classList.add('click'); await sleep(200); const el = $(sel); el.classList.remove('hover'); el.click(); },
+  caption(t) { const c = $('#caption'); if (!t) return c.classList.remove('show'); c.textContent = t; c.classList.add('show'); },
+  title(on) { $('#title').classList.toggle('hide', !on); },
+};
+if (!DEMO) main(); else window.startAgent = main;
+</script>
+</body>
+</html>

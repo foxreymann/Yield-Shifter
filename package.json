@@ -1,0 +1,16 @@
+{
+  "name": "yieldshifter",
+  "version": "1.0.0",
+  "description": "AI yield agent: finds the best Merkl yields for your risk policy and moves funds via Stripe test mode, explaining every move.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "voice": "node scripts/voice.mjs",
+    "record": "node scripts/record.mjs",
+    "video": "bash scripts/build-video.sh",
+    "demo": "bash scripts/demo.sh"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1"
+  }
+}
