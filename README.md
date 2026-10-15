@@ -1,6 +1,8 @@
 # YieldShifter
 
-**Track: Agents that spend.** An autonomous yield agent that puts idle stablecoins to work on [Merkl](https://app.merkl.xyz/). It moves every dollar through **Stripe test mode** inside a written policy and explains why each move happened.
+YieldShifter is an AI agent that puts idle stablecoins to work on Merkl. On first run it asks your risk profile (High or Very high) and crypto exposure cap, shows the UK risk warning, and writes a policy. It then scans live Merkl yields, rejects anything outside policy with a logged reason, and moves funds on its own. Each deposit and rebalance is a Stripe test-mode payment or refund with the reason in its metadata. Every pound explained.
+
+**Track: Agents that spend.**
 
 ## What does it do?
 
